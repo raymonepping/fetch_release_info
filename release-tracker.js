@@ -169,6 +169,9 @@ function printBanner() {
 ${bold(gold("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"))}
   ${bold("HashiCorp Enterprise Release Tracker")}
   ${dim("Versions · Release Notes · Change Highlights")}
+  
+  ${dim("Powered by")} ${cyan("IBM Bob")} ${dim("(https://bob.ibm.com)")}
+  ${dim("         & ")}${cyan("TinyFish")} ${dim("(https://www.tinyfish.ai)")}
 ${bold(gold("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"))}
 `);
 }
