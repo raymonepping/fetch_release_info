@@ -4,6 +4,14 @@
 import fs from "fs";
 import path from "path";
 import { OUTPUT_DIR, PRODUCTS } from "./config.js";
+import {
+  generateProductDiff,
+  formatDiffMarkdown,
+  formatDiffHtml,
+  generateChangeSummary,
+  diffStyles
+} from "./diff.js";
+import { readSnapshot } from "./snapshot.js";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -79,6 +87,29 @@ function productToMarkdown(data) {
     ? "\n> _Note: Release notes could not be matched to this specific version. Content shown is best-effort from the release notes page._\n"
     : "";
 
+  // Generate diff if previous snapshot exists
+  const previousSnapshot = readSnapshot(data.product);
+  const productDiff = generateProductDiff(data, previousSnapshot);
+  
+  let diffSection = '';
+  if (productDiff.hasChanges && !productDiff.isFirstRun) {
+    const summary = generateChangeSummary(productDiff);
+    diffSection = `
+## 📊 Changes Since Last Run
+
+**Summary:** ${summary}
+
+${formatDiffMarkdown(productDiff.whatsNew, "What's New")}
+
+${formatDiffMarkdown(productDiff.whatsChanged, "What's Changed")}
+
+${formatDiffMarkdown(productDiff.highlights, "Change Tracker Highlights")}
+
+---
+
+`;
+  }
+
   return `# ${data.label} Enterprise — Release Update
 
 **Generated:** ${date}
@@ -91,7 +122,7 @@ ${fallbackNote}
 | Previous | \`${markdownCell(formatVersion(data.reportedPrevious))}\` |
 | Latest | \`${markdownCell(formatVersion(data.latest))}\` |
 
-## What's New
+${diffSection}${diffSection ? '' : `## What's New
 
 ${bullet(data.whatsNew)}
 
@@ -103,7 +134,7 @@ ${bullet(data.whatsChanged)}
 
 ${bullet(data.highlights)}
 
----
+`}---
 _Source: [Release Notes](${getConfig(data.product).releaseNotesUrl}) · [Change Tracker](${getConfig(data.product).changeTrackerUrl})_
 `;
 }
@@ -293,6 +324,8 @@ const HTML_STYLE = `
     body { background: white; padding: 0; }
     .product-card { break-inside: avoid; }
   }
+
+  ${diffStyles}
 `;
 
 function productToHtmlCard(data) {
@@ -300,6 +333,23 @@ function productToHtmlCard(data) {
   const fallbackNote = data.fallback
     ? `<div class="fallback-note">⚠️ Release notes could not be matched to this specific version. Content shown is best-effort from the release notes page.</div>`
     : "";
+
+  // Generate diff if previous snapshot exists
+  const previousSnapshot = readSnapshot(data.product);
+  const productDiff = generateProductDiff(data, previousSnapshot);
+  
+  let diffSection = '';
+  if (productDiff.hasChanges && !productDiff.isFirstRun) {
+    const summary = generateChangeSummary(productDiff);
+    diffSection = `
+      <div class="diff-summary">
+        <strong>📊 Changes Since Last Run:</strong> ${escapeHtml(summary)}
+      </div>
+      ${formatDiffHtml(productDiff.whatsNew, "What's New")}
+      ${formatDiffHtml(productDiff.whatsChanged, "What's Changed")}
+      ${formatDiffHtml(productDiff.highlights, "Change Tracker Highlights")}
+    `;
+  }
 
   return `
   <div class="product-card">
@@ -320,6 +370,7 @@ function productToHtmlCard(data) {
         </tbody>
       </table>
 
+      ${diffSection || `
       <div class="section-title">What's New</div>
       ${htmlList(data.whatsNew)}
 
@@ -328,6 +379,7 @@ function productToHtmlCard(data) {
 
       <div class="section-title">Change Tracker Highlights</div>
       ${htmlList(data.highlights)}
+      `}
 
       <div class="source-links">
         <a href="${config.releaseNotesUrl}" target="_blank">Release Notes</a>
