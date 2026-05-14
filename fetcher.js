@@ -214,7 +214,8 @@ async function fetchViaTinyFish(url) {
 
     return { markdown: result.markdown, raw: null };
   } catch (err) {
-    console.warn(`  [warn] TinyFish fetch failed for ${url}: ${err.message}`);
+    // Silent fallback - this is expected behavior for some pages
+    // TinyFish may not be able to extract markdown from all page types
     return null;
   }
 }
@@ -297,7 +298,7 @@ async function fetchPage(url, { forceRaw = false } = {}) {
   if (USE_TINYFISH && !forceRaw) {
     const rendered = await fetchViaTinyFish(url);
     if (rendered) return rendered;
-    console.warn(`  [warn] Falling back to raw fetch for ${url}`);
+    // Silent fallback to raw fetch - this is normal for some page types
   }
   return fetchRaw(url);
 }
