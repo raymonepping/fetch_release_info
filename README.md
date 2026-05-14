@@ -20,7 +20,196 @@ Optional TinyFish rendering can be enabled with a local `.env` file:
 TINYFISH_API_KEY=your_key_here
 ```
 
-## Usage
+## Quick Start & Testing
+
+### 1. First Run - Test Single Product
+Start with a single product to verify everything works:
+
+```bash
+# Test with Vault (fastest to fetch)
+node release-tracker.js --product vault --format md
+
+# Expected output:
+# ✓ Fetching Vault Enterprise releases...
+# ✓ Latest version: 1.x.x+ent
+# ✓ Generated: output/vault-2026-05-14.md
+```
+
+**What to check:**
+- ✅ No errors in console
+- ✅ Progress bar shows 100%
+- ✅ File created in `output/` directory
+- ✅ Snapshot created in `snapshots/vault.json`
+
+### 2. Test Multiple Formats
+Generate all output formats for one product:
+
+```bash
+node release-tracker.js --product vault --format all
+
+# Creates:
+# - output/vault-2026-05-14.md
+# - output/vault-2026-05-14.html
+# - output/vault-2026-05-14.pdf
+```
+
+**What to check:**
+- ✅ All three files created
+- ✅ HTML opens in browser correctly
+- ✅ PDF renders properly (requires puppeteer)
+
+### 3. Test Parallel Fetching
+Try multiple products with different concurrency levels:
+
+```bash
+# Conservative (sequential)
+node release-tracker.js --product vault,terraform --format md --concurrency 1
+# Takes ~6-8 seconds
+
+# Balanced (default)
+node release-tracker.js --product vault,terraform --format md --concurrency 2
+# Takes ~3-4 seconds (50% faster!)
+
+# Aggressive
+node release-tracker.js --product vault,terraform,consul --format md --concurrency 3
+# Takes ~4-5 seconds for 3 products
+```
+
+**What to check:**
+- ✅ Progress bar updates in real-time
+- ✅ ETA calculations appear
+- ✅ Higher concurrency = faster completion
+- ✅ All products complete successfully
+
+### 4. Test Caching (Second Run)
+Run the same command twice to see caching in action:
+
+```bash
+# First run (fetches from network)
+node release-tracker.js --product vault --format md
+# Takes ~2-3 seconds
+
+# Second run (uses cache)
+node release-tracker.js --product vault --format md
+# Takes <1 second! (95% faster)
+```
+
+**What to check:**
+- ✅ Second run is dramatically faster
+- ✅ Output is identical
+- ✅ Cache files created in `cache/` directory
+
+### 5. Full Production Test
+Test all products with all formats:
+
+```bash
+node release-tracker.js --all --format all --concurrency 2
+
+# Expected timing:
+# - Without cache: ~12-18 seconds
+# - With cache: ~2-3 seconds
+# - Sequential (--concurrency 1): ~25-35 seconds
+```
+
+**What to check:**
+- ✅ All 6 products processed
+- ✅ 18 files created (6 products × 3 formats)
+- ✅ Combined reports generated
+- ✅ No errors or warnings
+
+### 6. Test Error Handling
+Test retry logic by temporarily disconnecting network:
+
+```bash
+# Disconnect WiFi, then run:
+node release-tracker.js --product vault --format md
+
+# Expected behavior:
+# ⚠ Attempt 1 failed, retrying in 1s...
+# ⚠ Attempt 2 failed, retrying in 2s...
+# ⚠ Attempt 3 failed, retrying in 4s...
+# ✗ Failed after 3 attempts
+```
+
+**What to check:**
+- ✅ Automatic retry attempts
+- ✅ Exponential backoff delays
+- ✅ Graceful error messages
+
+### 7. Verify Output Quality
+
+**Check Markdown output:**
+```bash
+cat output/vault-2026-05-14.md
+```
+Should contain:
+- ✅ Product name and version
+- ✅ Release date
+- ✅ Release notes section
+- ✅ Change highlights
+- ✅ Previous version comparison
+
+**Check HTML output:**
+```bash
+open output/vault-2026-05-14.html
+```
+Should display:
+- ✅ Formatted content with styling
+- ✅ Proper headings and sections
+- ✅ Readable layout
+
+**Check PDF output:**
+```bash
+open output/vault-2026-05-14.pdf
+```
+Should show:
+- ✅ Professional formatting
+- ✅ All content from HTML
+- ✅ Proper page breaks
+
+### 8. Test Combined Reports
+Generate a combined report for multiple products:
+
+```bash
+node release-tracker.js --product vault,terraform,consul --format html --scope combined
+
+# Creates: output/combined-vault-terraform-consul-2026-05-14.html
+```
+
+**What to check:**
+- ✅ Single file with all products
+- ✅ Table of contents
+- ✅ Proper section separation
+
+### Common Issues & Solutions
+
+**Issue: "Module not found"**
+```bash
+# Solution: Install dependencies
+npm install
+```
+
+**Issue: "PDF generation failed"**
+```bash
+# Solution: Install puppeteer
+npm install puppeteer
+# Or skip PDF: --format md,html
+```
+
+**Issue: "Rate limit exceeded"**
+```bash
+# Solution: Reduce concurrency
+node release-tracker.js --all --format all --concurrency 1
+```
+
+**Issue: "TinyFish API key not found"**
+```bash
+# Solution: Create .env file
+echo "TINYFISH_API_KEY=your_key_here" > .env
+# Or run without TinyFish (still works, just less accurate)
+```
+
+## Usage Examples
 
 ```bash
 # All products, all formats (parallel fetching)
