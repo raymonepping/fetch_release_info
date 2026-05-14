@@ -43,7 +43,7 @@
     "2.0.0 - Yes - All - Secrets Engines items-per-page change can hide results",
     "2.0.0 - Yes - Enterprise - LDAP secrets self-managed static roles feature does not work with the openldap built-in type alias"
   ],
-  "fetchedAt": "2026-05-14T09:42:59.987Z",
+  "fetchedAt": "2026-05-14T09:46:24.170Z",
   "fallback": false,
   "reportedPrevious": "2.0.0-rc1+ent",
   "isFirstRun": false,

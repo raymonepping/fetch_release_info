@@ -257,14 +257,17 @@ echo "TINYFISH_API_KEY=your_key_here" > .env
 ## Usage Examples
 
 ```bash
-# All products, all formats (parallel fetching)
+# All Enterprise products, all formats (parallel fetching)
 node release-tracker.js --all --format all
+
+# Force fresh fetch (bypass cache)
+node release-tracker.js --all --format all --force
 
 # Single product, PDF only
 node release-tracker.js --product vault --format pdf
 
 # Subset of products, Markdown only, combined report
-node release-tracker.js --product vault,terraform,consul --format md --scope combined
+node release-tracker.js --product vault,consul --format md --scope combined
 
 # Individual HTML files only (no combined)
 node release-tracker.js --product vault,nomad --format html --scope individual
@@ -272,7 +275,13 @@ node release-tracker.js --product vault,nomad --format html --scope individual
 # Control concurrency (useful for rate limiting)
 node release-tracker.js --all --format all --concurrency 3
 
-# Sequential mode (legacy, slower but more conservative)
+# Debug mode (show TinyFish warnings)
+node release-tracker.js --product vault --format md --debug
+
+# Force refresh with debug output
+node release-tracker.js --all --format all --force --debug
+
+# Sequential mode (slower but more conservative)
 node release-tracker.js --all --format all --concurrency 1
 ```
 
@@ -280,11 +289,13 @@ node release-tracker.js --all --format all --concurrency 1
 
 | Flag | Values | Default | Description |
 |---|---|---|---|
-| `--all` | — | — | Track all supported products |
-| `--product` | comma-separated keys | — | e.g. `vault,terraform` |
+| `--all` | — | — | Track all Enterprise products (vault, boundary, nomad, consul) |
+| `--product` | comma-separated keys | — | e.g. `vault,consul` |
 | `--format` | `md` `html` `pdf` `all` | `all` | Output format(s) |
 | `--scope` | `individual` `combined` `both` | `both` | Per-product files, one combined file, or both |
 | `--concurrency` | number | `2` | Max parallel fetches (1 = sequential) |
+| `--force` | — | — | Bypass cache and force fresh fetch from network |
+| `--debug` | — | — | Show debug warnings (TinyFish fallbacks, etc.) |
 | `--help` | — | — | Show usage |
 
 ## Output
@@ -364,4 +375,15 @@ node release-tracker.js --all --format all
 
 The releases index (`releases.hashicorp.com`) is always fetched raw — it's plain HTML, using TinyFish for it would waste quota.
 
+
+## Powered By
+
+This project is built with:
+
+- **[IBM Bob](https://bob.ibm.com)** - AI-powered development assistant for code generation and optimization
+- **[TinyFish](https://www.tinyfish.ai)** - JavaScript-rendered content extraction for accurate release notes parsing
+
+## License
+
+MIT
 TinyFish Search and Fetch are free. Get a key at [agent.tinyfish.ai](https://agent.tinyfish.ai).
