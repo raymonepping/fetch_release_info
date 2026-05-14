@@ -138,8 +138,11 @@ class ProgressTracker {
     this.lastUpdate = 0;
   }
 
-  update(productLabel, status = "processing") {
-    this.current++;
+  update(productLabel, status = "processing", increment = true) {
+    if (increment) {
+      this.current++;
+    }
+    
     const now = Date.now();
     
     // Throttle updates to avoid console spam (max once per 100ms)
@@ -148,24 +151,27 @@ class ProgressTracker {
     }
     this.lastUpdate = now;
     
-    const percent = Math.round((this.current / this.total) * 100);
+    // Clamp current to total to prevent overflow
+    const current = Math.min(this.current, this.total);
+    const percent = Math.round((current / this.total) * 100);
     const elapsed = ((now - this.startTime) / 1000).toFixed(1);
-    const avgTimePerItem = (now - this.startTime) / this.current;
-    const remaining = this.total - this.current;
+    const avgTimePerItem = (now - this.startTime) / current;
+    const remaining = this.total - current;
     const eta = remaining > 0 ? (avgTimePerItem * remaining / 1000).toFixed(1) : 0;
     
-    // Build progress bar
+    // Build progress bar with bounds checking
     const barLength = 20;
-    const filled = Math.round((this.current / this.total) * barLength);
-    const bar = "█".repeat(filled) + "░".repeat(barLength - filled);
+    const filled = Math.max(0, Math.min(barLength, Math.round((current / this.total) * barLength)));
+    const empty = Math.max(0, barLength - filled);
+    const bar = "█".repeat(filled) + "░".repeat(empty);
     
-    const statusText = `[${bar}] ${percent}% | ${this.current}/${this.total} | ${productLabel} - ${status}`;
+    const statusText = `[${bar}] ${percent}% | ${current}/${this.total} | ${productLabel} - ${status}`;
     const timeText = `${elapsed}s elapsed, ~${eta}s remaining`;
     
     // Clear line and write progress
     process.stdout.write(`\r\x1b[K  ${statusText} | ${timeText}`);
     
-    if (this.current === this.total) {
+    if (current === this.total) {
       console.log(); // New line when complete
     }
   }
@@ -614,7 +620,7 @@ export async function fetchProduct(productKey, progressTracker = null) {
       console.log(`  ${config.label}: ${previous} → ${latest}`);
       console.log(`  Fetching release notes...`);
     } else {
-      progressTracker.update(config.label, "fetching notes");
+      progressTracker.update(config.label, "fetching notes", false);
     }
 
     const [notes, tracker] = await Promise.all([
