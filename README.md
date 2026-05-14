@@ -104,12 +104,29 @@ TinyFish API responses are processed via streaming when available, reducing memo
 
 HashiCorp's developer docs are Docusaurus/Next.js — JavaScript-rendered. Without TinyFish, release notes are parsed from raw HTML which may miss content that only appears after JS execution.
 
-With `TINYFISH_API_KEY` set in your shell or in `.env`, the tracker routes docs page fetches through [TinyFish Fetch](https://docs.tinyfish.ai), which renders the full page and returns clean Markdown. This significantly improves release notes and change tracker extraction accuracy.
+With `TINYFISH_API_KEY` set, the tracker routes docs page fetches through [TinyFish Fetch](https://docs.tinyfish.ai), which renders the full page and returns clean Markdown. This significantly improves release notes and change tracker extraction accuracy.
 
+### Setup
+
+The tracker uses `dotenv` to automatically load environment variables from a `.env` file in the project root:
+
+**Option 1: Using .env file (recommended)**
 ```bash
-TINYFISH_API_KEY=your_key_here
+# Create or edit .env file
+echo "TINYFISH_API_KEY=your_key_here" > .env
+
+# Run normally - dotenv loads .env automatically
 node release-tracker.js --all --format all
 ```
+
+**Option 2: Using shell environment**
+```bash
+# Set in current shell session
+export TINYFISH_API_KEY=your_key_here
+node release-tracker.js --all --format all
+```
+
+**Note:** The `.env` file is gitignored for security. Your API key is already configured if you have a `.env` file with `TINYFISH_API_KEY` set.
 
 The releases index (`releases.hashicorp.com`) is always fetched raw — it's plain HTML, using TinyFish for it would waste quota.
 

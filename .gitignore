@@ -1,0 +1,7 @@
+node_modules/
+output/
+snapshots/
+cache/
+.env
+
+# Made with Bob
