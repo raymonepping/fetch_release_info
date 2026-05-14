@@ -4,14 +4,21 @@ Tracks Enterprise versions, release notes, and change highlights for HashiCorp p
 
 ## Supported Products
 
-**Products with Enterprise Releases:**
+### Enterprise Products (Default)
+These products have separate `+ent` binary releases and are tracked by default with `--all`:
+
 - `vault` - Vault Enterprise
 - `boundary` - Boundary Enterprise
 - `nomad` - Nomad Enterprise
 - `consul` - Consul Enterprise
-- `packer` - Packer Enterprise
 
-**Note:** `terraform` is included in the configuration but **does not have Enterprise binary releases** with the `+ent` suffix. Terraform Enterprise features are delivered through Terraform Cloud/Enterprise platforms, not as separate binaries. The tracker will report "No ENT versions found" for Terraform, which is expected behavior.
+### Optional Products
+These products are available but don't have `+ent` binaries (Enterprise features via Cloud/Platform):
+
+- `terraform` - Terraform (use `--product terraform` to include)
+- `packer` - Packer (use `--product packer` to include)
+
+**Note:** Terraform and Packer Enterprise features are delivered through Cloud/Enterprise platforms, not as separate `+ent` binaries. The tracker will report "No ENT versions found" for these products, which is expected behavior.
 
 ## Setup
 

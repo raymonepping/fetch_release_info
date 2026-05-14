@@ -6,7 +6,7 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { PRODUCTS, ALL_PRODUCTS, OUTPUT_DIR, SNAPSHOT_DIR } from './config.js';
+import { PRODUCTS, ENTERPRISE_PRODUCTS, ALL_PRODUCTS, OUTPUT_DIR, SNAPSHOT_DIR } from './config.js';
 import { fetchProducts } from './fetcher.js';
 import { processSnapshots } from './snapshot.js';
 import { render } from './renderer.js';
@@ -31,7 +31,8 @@ app.use(express.static(path.join(__dirname, 'public')));
  */
 app.get('/api/products', (req, res) => {
   try {
-    const products = ALL_PRODUCTS.map(key => {
+    // Only show Enterprise products by default
+    const products = ENTERPRISE_PRODUCTS.map(key => {
       const config = PRODUCTS[key];
       const snapshot = readSnapshot(key);
       

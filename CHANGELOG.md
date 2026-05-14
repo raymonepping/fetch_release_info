@@ -1,6 +1,19 @@
 # Changelog
 
 All notable changes to the HashiCorp Enterprise Release Tracker.
+## [3.1.0] - 2026-05-14
+
+### Changed
+- **Default Product List**: `--all` flag now tracks only Enterprise products with `+ent` binaries (Vault, Boundary, Nomad, Consul)
+- **Optional Products**: Terraform and Packer marked as optional (no `+ent` binaries, Enterprise via Cloud/Platform)
+- **Web Dashboard**: Now displays only the 4 Enterprise products by default
+- **Configuration**: Added `hasEnterprise` flag to product configs and `ENTERPRISE_PRODUCTS` export
+
+### Improved
+- Clearer documentation about which products have Enterprise binary releases
+- Better user experience by focusing on products with actual `+ent` versions
+- Terraform and Packer still available via explicit `--product` flag
+
 
 ## [3.0.0] - 2026-05-14
 

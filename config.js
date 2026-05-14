@@ -9,6 +9,7 @@ export const PRODUCTS = {
     changeTrackerUrl: "https://developer.hashicorp.com/vault/docs/updates/change-tracker",
     entSuffix: "+ent",
     versionPattern: /^(\d+\.\d+\.\d+)\+ent$/,
+    hasEnterprise: true,
   },
   boundary: {
     label: "Boundary",
@@ -17,6 +18,7 @@ export const PRODUCTS = {
     changeTrackerUrl: "https://developer.hashicorp.com/boundary/docs/updates/change-tracker",
     entSuffix: "+ent",
     versionPattern: /^(\d+\.\d+\.\d+)\+ent$/,
+    hasEnterprise: true,
   },
   nomad: {
     label: "Nomad",
@@ -25,15 +27,7 @@ export const PRODUCTS = {
     changeTrackerUrl: "https://developer.hashicorp.com/nomad/docs/updates/change-tracker",
     entSuffix: "+ent",
     versionPattern: /^(\d+\.\d+\.\d+)\+ent$/,
-  },
-  terraform: {
-    label: "Terraform",
-    releasesUrl: "https://releases.hashicorp.com/terraform/",
-    releaseNotesUrl: "https://developer.hashicorp.com/terraform/language/upgrade-guides",
-    changeTrackerUrl: "https://developer.hashicorp.com/terraform/docs/updates/change-tracker",
-    // Terraform ENT uses a different suffix
-    entSuffix: "+ent",
-    versionPattern: /^(\d+\.\d+\.\d+)\+ent$/,
+    hasEnterprise: true,
   },
   consul: {
     label: "Consul",
@@ -42,6 +36,16 @@ export const PRODUCTS = {
     changeTrackerUrl: "https://developer.hashicorp.com/consul/docs/updates/change-tracker",
     entSuffix: "+ent",
     versionPattern: /^(\d+\.\d+\.\d+)\+ent$/,
+    hasEnterprise: true,
+  },
+  terraform: {
+    label: "Terraform",
+    releasesUrl: "https://releases.hashicorp.com/terraform/",
+    releaseNotesUrl: "https://developer.hashicorp.com/terraform/language/upgrade-guides",
+    changeTrackerUrl: "https://developer.hashicorp.com/terraform/docs/updates/change-tracker",
+    entSuffix: "+ent",
+    versionPattern: /^(\d+\.\d+\.\d+)\+ent$/,
+    hasEnterprise: false, // No +ent binaries - Enterprise via Cloud/Platform
   },
   packer: {
     label: "Packer",
@@ -50,10 +54,16 @@ export const PRODUCTS = {
     changeTrackerUrl: "https://developer.hashicorp.com/packer/docs/updates/change-tracker",
     entSuffix: "+ent",
     versionPattern: /^(\d+\.\d+\.\d+)\+ent$/,
+    hasEnterprise: false, // No +ent binaries
   },
 };
 
-// All valid product keys for --all flag
+// Products with Enterprise binary releases (default for --all)
+export const ENTERPRISE_PRODUCTS = Object.keys(PRODUCTS).filter(
+  key => PRODUCTS[key].hasEnterprise
+);
+
+// All valid product keys (including non-Enterprise)
 export const ALL_PRODUCTS = Object.keys(PRODUCTS);
 
 // Output directory (relative to project root)

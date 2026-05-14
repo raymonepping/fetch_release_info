@@ -8,7 +8,7 @@
 //   node release-tracker.js --help
 
 import path from "path";
-import { ALL_PRODUCTS } from "./config.js";
+import { ENTERPRISE_PRODUCTS, ALL_PRODUCTS } from "./config.js";
 import { fetchProducts } from "./fetcher.js";
 import { processSnapshots } from "./snapshot.js";
 import { render } from "./renderer.js";
@@ -46,7 +46,7 @@ ${bold("Usage:")}
   node release-tracker.js [options]
 
 ${bold("Options:")}
-  ${cyan("--all")}                     Track all supported products
+  ${cyan("--all")}                     Track all Enterprise products (vault, boundary, nomad, consul)
   ${cyan("--product")} <list>          Comma-separated product keys
                              Supported: ${ALL_PRODUCTS.join(", ")}
   ${cyan("--format")}  <format>        Output format: md | html | pdf | all  (default: all)
@@ -146,7 +146,7 @@ function parseArgs(argv) {
 
   // Resolve product list
   if (result.all) {
-    result.products = [...ALL_PRODUCTS];
+    result.products = [...ENTERPRISE_PRODUCTS]; // Default to Enterprise products only
   }
 
   // Deduplicate
