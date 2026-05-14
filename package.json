@@ -1,0 +1,22 @@
+{
+  "name": "release-tracker",
+  "version": "1.0.0",
+  "description": "HashiCorp Enterprise release tracker — versions, what's new, what's changed",
+  "type": "module",
+  "main": "release-tracker.js",
+  "scripts": {
+    "start": "node release-tracker.js",
+    "track:all": "node release-tracker.js --all --format all",
+    "track:vault": "node release-tracker.js --product vault --format all"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "dotenv": "^17.4.2",
+    "node-fetch": "^3.3.2",
+    "puppeteer": "^22.0.0",
+    "semver": "^7.8.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
