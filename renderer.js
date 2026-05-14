@@ -3,6 +3,8 @@
 
 import fs from "fs";
 import path from "path";
+import { Worker } from "worker_threads";
+import { fileURLToPath } from "url";
 import { OUTPUT_DIR, PRODUCTS } from "./config.js";
 import {
   generateProductDiff,
@@ -12,6 +14,9 @@ import {
   diffStyles
 } from "./diff.js";
 import { readSnapshot } from "./snapshot.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -417,37 +422,67 @@ function toHTML(dataArray, title = "HashiCorp Enterprise — Release Update") {
 </html>`;
 }
 
-// ─── PDF ─────────────────────────────────────────────────────────────────────
+// ─── PDF (Worker Thread Implementation) ──────────────────────────────────────
 
+/**
+ * Generate PDF using worker thread for parallel processing
+ */
 async function toPDF(htmlContent, outputPath) {
-  // Dynamic import — puppeteer is optional at require-time
-  let puppeteer;
-  try {
-    puppeteer = (await import("puppeteer")).default;
-  } catch {
-    console.warn("  [warn] puppeteer not installed — skipping PDF generation");
-    console.warn("         Run: npm install puppeteer");
-    return false;
-  }
-
-  const browser = await puppeteer.launch({
-    headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
-
-  try {
-    const page = await browser.newPage();
-    await page.setContent(htmlContent, { waitUntil: "networkidle0" });
-    await page.pdf({
-      path: outputPath,
-      format: "A4",
-      printBackground: true,
-      margin: { top: "20mm", bottom: "20mm", left: "15mm", right: "15mm" },
+  return new Promise((resolve) => {
+    const workerPath = path.join(__dirname, 'pdf-worker.js');
+    
+    const worker = new Worker(workerPath, {
+      workerData: { htmlContent, outputPath }
     });
-    return true;
-  } finally {
-    await browser.close();
-  }
+
+    worker.on('message', (result) => {
+      if (result.success) {
+        resolve(true);
+      } else {
+        if (result.error === 'puppeteer not installed') {
+          console.warn("  [warn] puppeteer not installed — skipping PDF generation");
+          console.warn("         Run: npm install puppeteer");
+        } else {
+          console.warn(`  [warn] PDF generation failed: ${result.error}`);
+        }
+        resolve(false);
+      }
+    });
+
+    worker.on('error', (error) => {
+      console.warn(`  [warn] Worker error: ${error.message}`);
+      resolve(false);
+    });
+
+    worker.on('exit', (code) => {
+      if (code !== 0) {
+        console.warn(`  [warn] Worker stopped with exit code ${code}`);
+        resolve(false);
+      }
+    });
+  });
+}
+
+/**
+ * Generate multiple PDFs in parallel using worker pool
+ */
+async function toPDFParallel(pdfJobs) {
+  if (pdfJobs.length === 0) return [];
+  
+  console.log(`  Generating ${pdfJobs.length} PDFs in parallel...`);
+  const startTime = Date.now();
+  
+  const results = await Promise.all(
+    pdfJobs.map(job => toPDF(job.htmlContent, job.outputPath))
+  );
+  
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+  const successful = results.filter(Boolean).length;
+  console.log(`  ✓ Generated ${successful}/${pdfJobs.length} PDFs in ${elapsed}s`);
+  
+  return pdfJobs
+    .filter((_, i) => results[i])
+    .map(job => job.outputPath);
 }
 
 // ─── Config accessor (avoid circular import) ─────────────────────────────────
@@ -469,6 +504,7 @@ export async function render(dataArray, format = "all", scope = "both") {
   ensureDir(OUTPUT_DIR);
   const date = datestamp();
   const written = [];
+  const pdfJobs = []; // Collect PDF jobs for parallel processing
 
   const formats = format === "all" ? ["md", "html", "pdf"] : [format];
   const scopes  = scope  === "both" ? ["individual", "combined"] : [scope];
@@ -496,9 +532,7 @@ export async function render(dataArray, format = "all", scope = "both") {
           if (fmt === "pdf") {
             const htmlContent = toHTML([data], `${data.label} Enterprise — Release Update`);
             const filePath = `${base}.pdf`;
-            console.log(`  Generating PDF: ${path.basename(filePath)}...`);
-            const ok = await toPDF(htmlContent, filePath);
-            if (ok) written.push(filePath);
+            pdfJobs.push({ htmlContent, outputPath: filePath });
           }
         }
       }
@@ -524,12 +558,16 @@ export async function render(dataArray, format = "all", scope = "both") {
         if (fmt === "pdf") {
           const htmlContent = toHTML(dataArray);
           const filePath = `${base}.pdf`;
-          console.log(`  Generating combined PDF...`);
-          const ok = await toPDF(htmlContent, filePath);
-          if (ok) written.push(filePath);
+          pdfJobs.push({ htmlContent, outputPath: filePath });
         }
       }
     }
+  }
+
+  // Generate all PDFs in parallel using worker threads
+  if (pdfJobs.length > 0) {
+    const pdfPaths = await toPDFParallel(pdfJobs);
+    written.push(...pdfPaths);
   }
 
   return written;
