@@ -2,9 +2,16 @@
 
 Tracks Enterprise versions, release notes, and change highlights for HashiCorp products. Generates Markdown, HTML, and PDF reports for sharing with customers and partners.
 
-## Supported products
+## Supported Products
 
-`vault` · `boundary` · `nomad` · `terraform` · `consul` · `packer`
+**Products with Enterprise Releases:**
+- `vault` - Vault Enterprise
+- `boundary` - Boundary Enterprise
+- `nomad` - Nomad Enterprise
+- `consul` - Consul Enterprise
+- `packer` - Packer Enterprise
+
+**Note:** `terraform` is included in the configuration but **does not have Enterprise binary releases** with the `+ent` suffix. Terraform Enterprise features are delivered through Terraform Cloud/Enterprise platforms, not as separate binaries. The tracker will report "No ENT versions found" for Terraform, which is expected behavior.
 
 ## Setup
 
