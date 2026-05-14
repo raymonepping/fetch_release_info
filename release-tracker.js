@@ -52,6 +52,7 @@ ${bold("Options:")}
   ${cyan("--format")}  <format>        Output format: md | html | pdf | all  (default: all)
   ${cyan("--scope")}   <scope>         Output scope: individual | combined | both  (default: both)
   ${cyan("--concurrency")} <number>    Max parallel fetches (default: 2, use 1 for sequential)
+  ${cyan("--force")}                   Bypass cache and force fresh fetch from network
   ${cyan("--debug")}                   Show debug warnings (TinyFish fallbacks, etc.)
   ${cyan("--help")}                    Show this help
 
@@ -80,6 +81,7 @@ function parseArgs(argv) {
     scope: "both",
     concurrency: 2,
     debug: false,
+    force: false,
     help: false,
     errors: [],
   };
@@ -99,6 +101,11 @@ function parseArgs(argv) {
 
     if (arg === "--debug") {
       result.debug = true;
+      continue;
+    }
+
+    if (arg === "--force") {
+      result.force = true;
       continue;
     }
 
@@ -240,9 +247,12 @@ async function main() {
 
   // ── Step 1: Fetch ──────────────────────────────────────────────────────────
   console.log(bold("[ 1/3 ] Fetching release data...\n"));
+  if (args.force) {
+    console.log(dim("  [force mode] Bypassing cache, fetching fresh data...\n"));
+  }
   let productData;
   try {
-    productData = await fetchProducts(args.products, args.concurrency, args.debug);
+    productData = await fetchProducts(args.products, args.concurrency, args.debug, args.force);
   } catch (err) {
     console.error(red(`\n  Fatal fetch error: ${err.message}`));
     process.exit(1);

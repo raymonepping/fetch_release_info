@@ -254,6 +254,30 @@ export class ReleaseNotesCache extends ResponseCache {
   }
 }
 
+// ─── Clear all caches ─────────────────────────────────────────────────────────
+
+/**
+ * Clear all cache directories (for --force flag)
+ */
+export function clearAllCaches() {
+  const cacheDirs = [
+    './cache',
+    './cache/versions',
+    './cache/notes'
+  ];
+  
+  for (const dir of cacheDirs) {
+    if (fs.existsSync(dir)) {
+      const files = fs.readdirSync(dir);
+      for (const file of files) {
+        if (file.endsWith('.json')) {
+          fs.unlinkSync(path.join(dir, file));
+        }
+      }
+    }
+  }
+}
+
 // ─── Export singleton instances ───────────────────────────────────────────────
 
 export const responseCache = new ResponseCache();

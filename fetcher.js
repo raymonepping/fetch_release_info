@@ -661,9 +661,20 @@ export async function fetchProduct(productKey, progressTracker = null) {
  *
  * @param {string[]} productKeys - Array of product keys to fetch
  * @param {number} concurrency - Maximum number of concurrent fetches (default: 2)
+ * @param {boolean} debug - Enable debug warnings (default: false)
+ * @param {boolean} force - Bypass cache and force fresh fetch (default: false)
  * @returns {Promise<Array>} Array of product data objects
  */
-export async function fetchProducts(productKeys, concurrency = 2) {
+export async function fetchProducts(productKeys, concurrency = 2, debug = false, force = false) {
+  // Set global debug mode
+  setDebugMode(debug);
+  
+  // Clear cache if force mode enabled
+  if (force) {
+    const { clearAllCaches } = await import('./cache.js');
+    clearAllCaches();
+  }
+  
   logFetchMode();
   
   const results = [];
