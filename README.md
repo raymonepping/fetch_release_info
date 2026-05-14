@@ -27,6 +27,37 @@ Optional TinyFish rendering can be enabled with a local `.env` file:
 TINYFISH_API_KEY=your_key_here
 ```
 
+## Web Dashboard 🚀
+
+The tracker includes a modern web dashboard for easy management:
+
+```bash
+npm run dashboard
+```
+
+Then open **http://localhost:3000** in your browser.
+
+### Dashboard Features
+
+- **📊 Product Overview** - View all products with current versions and status
+- **🔄 Fetch Data** - Trigger fetches from the web interface with configurable concurrency
+- **📝 Generate Reports** - Create reports in multiple formats (MD, HTML, PDF)
+- **📄 View Reports** - Browse and download generated reports
+- **⚡ Real-time Updates** - See fetch progress and results instantly
+- **🎨 Modern UI** - Responsive design with HashiCorp branding
+
+### API Endpoints
+
+The dashboard exposes a REST API:
+
+- `GET /api/products` - List all products with status
+- `GET /api/product/:key` - Get detailed product information
+- `POST /api/fetch` - Trigger fetch for selected products
+- `POST /api/generate` - Generate reports
+- `GET /api/reports` - List generated reports
+- `GET /api/report/:filename` - Download a specific report
+- `GET /api/diff/:key` - Get diff information for a product
+
 ## Quick Start & Testing
 
 ### 1. First Run - Test Single Product
