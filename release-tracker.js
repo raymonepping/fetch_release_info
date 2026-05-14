@@ -52,6 +52,7 @@ ${bold("Options:")}
   ${cyan("--format")}  <format>        Output format: md | html | pdf | all  (default: all)
   ${cyan("--scope")}   <scope>         Output scope: individual | combined | both  (default: both)
   ${cyan("--concurrency")} <number>    Max parallel fetches (default: 2, use 1 for sequential)
+  ${cyan("--debug")}                   Show debug warnings (TinyFish fallbacks, etc.)
   ${cyan("--help")}                    Show this help
 
 ${bold("Examples:")}
@@ -78,6 +79,7 @@ function parseArgs(argv) {
     format: "all",
     scope: "both",
     concurrency: 2,
+    debug: false,
     help: false,
     errors: [],
   };
@@ -92,6 +94,11 @@ function parseArgs(argv) {
 
     if (arg === "--all") {
       result.all = true;
+      continue;
+    }
+
+    if (arg === "--debug") {
+      result.debug = true;
       continue;
     }
 
@@ -232,7 +239,7 @@ async function main() {
   console.log(bold("[ 1/3 ] Fetching release data...\n"));
   let productData;
   try {
-    productData = await fetchProducts(args.products, args.concurrency);
+    productData = await fetchProducts(args.products, args.concurrency, args.debug);
   } catch (err) {
     console.error(red(`\n  Fatal fetch error: ${err.message}`));
     process.exit(1);

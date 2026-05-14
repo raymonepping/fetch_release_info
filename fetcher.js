@@ -21,6 +21,13 @@ const TINYFISH_FETCH_URL = "https://api.fetch.tinyfish.ai";
 const USE_TINYFISH       = Boolean(TINYFISH_API_KEY);
 const CHANGE_TRACKER_LIMIT = 30;
 
+// Global debug flag (set by CLI)
+let DEBUG_MODE = false;
+
+export function setDebugMode(enabled) {
+  DEBUG_MODE = enabled;
+}
+
 // ─── Fetch mode banner ────────────────────────────────────────────────────────
 
 export function logFetchMode() {
@@ -214,8 +221,10 @@ async function fetchViaTinyFish(url) {
 
     return { markdown: result.markdown, raw: null };
   } catch (err) {
-    // Silent fallback - this is expected behavior for some pages
-    // TinyFish may not be able to extract markdown from all page types
+    // Only show warnings in debug mode
+    if (DEBUG_MODE) {
+      console.warn(`  [debug] TinyFish fetch failed for ${url}: ${err.message}`);
+    }
     return null;
   }
 }
@@ -298,7 +307,10 @@ async function fetchPage(url, { forceRaw = false } = {}) {
   if (USE_TINYFISH && !forceRaw) {
     const rendered = await fetchViaTinyFish(url);
     if (rendered) return rendered;
-    // Silent fallback to raw fetch - this is normal for some page types
+    // Only show fallback message in debug mode
+    if (DEBUG_MODE) {
+      console.warn(`  [debug] Falling back to raw fetch for ${url}`);
+    }
   }
   return fetchRaw(url);
 }
